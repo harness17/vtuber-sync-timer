@@ -85,7 +85,6 @@
   main {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto auto;
     gap: 12px;
     padding: 16px;
     max-width: 960px;
@@ -451,7 +450,7 @@
     LIVE SYNC TIMER
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
-    <label style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;white-space:nowrap">PANEL BG:</label>
+    <label style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;white-space:nowrap">パネル背景色:</label>
     <input type="color" id="global-color-picker" value="#0f1218"
       style="width:26px;height:26px;border:1px solid var(--border);border-radius:2px;background:transparent;cursor:pointer;padding:2px;"
       oninput="syncGlobalColorText()">
@@ -473,7 +472,7 @@
 
   <!-- ① 作品情報 (全幅) -->
   <div class="panel full-width">
-    <div class="panel-label"><span></span>WORK INFO — 作品情報</div>
+    <div class="panel-label"><span></span>作品情報</div>
     <div class="work-info-grid">
       <div class="input-group">
         <label>TITLE / タイトル</label>
@@ -493,7 +492,7 @@
     </div>
     <input type="hidden" id="work-len-h" value="0">
     <input type="hidden" id="work-len" value="0">
-    <div class="panel-label" style="margin-bottom:6px"><span></span>ANNOUNCE TEXT — 視聴者へのアナウンス</div>
+    <div class="panel-label" style="margin-bottom:6px"><span></span>視聴者へのアナウンス</div>
     <textarea class="announce-box" id="announce-box" rows="2" placeholder="タイトルを入力するとアナウンス文が生成されます"></textarea>
     <div class="announce-hint">※ 直接編集できます。「自動生成に戻す」でリセット可。</div>
     <div class="btn-row">
@@ -502,90 +501,89 @@
     </div>
   </div>
 
-  <!-- ② カウントダウン -->
-  <div class="panel accent2" id="panel-cd">
-    <div class="panel-label"><span></span>COUNTDOWN — 再生開始カウントダウン</div>
-    <div class="timer-display accent2-color" id="cd-disp">00:00</div>
-    <div class="cd-input-row">
-      <div class="input-group">
-        <label>MIN</label>
-        <input type="number" id="cd-min" value="0" min="0" max="99">
-      </div>
-      <div class="input-group">
-        <label>SEC</label>
-        <input type="number" id="cd-sec" value="5" min="0" max="59">
-      </div>
-      <button class="btn btn-pink" id="cd-start-btn" onclick="cdToggle()">▶ START</button>
-      <button class="btn btn-muted" onclick="cdReset()">■ RESET</button>
-    </div>
-    <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:8px">
-      ※ 0になると自動で作品タイマーをスタート
-    </div>
-  </div>
+  <!-- ② カウントダウン＋作品タイマー（統合・全幅） -->
+  <div class="panel accent2 full-width" id="panel-work">
+    <div class="panel-label"><span></span>カウントダウン / 作品再生タイマー</div>
 
-  <!-- ③ 作品タイマー -->
-  <div class="panel" id="panel-work">
-    <div class="panel-label"><span></span>WORK TIMER — 作品再生タイマー</div>
-
-    <!-- 経過 / 残り の2段表示 -->
-    <div style="display:flex;gap:20px;align-items:flex-end;margin-bottom:4px;">
-      <div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:2px">ELAPSED</div>
-        <div class="timer-display" id="work-timer-disp" style="margin:0;font-size:40px">00:00:00</div>
+    <!-- カウントダウン表示エリア -->
+    <div id="cd-area">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:2px">カウントダウン</div>
+      <div class="timer-display accent2-color" id="cd-disp" style="margin:0 0 14px;font-size:52px">00:00</div>
+      <div class="cd-input-row">
+        <div class="input-group">
+          <label>MIN</label>
+          <input type="number" id="cd-min" value="0" min="0" max="99">
+        </div>
+        <div class="input-group">
+          <label>SEC</label>
+          <input type="number" id="cd-sec" value="5" min="0" max="59">
+        </div>
+        <button class="btn btn-pink" id="cd-start-btn" onclick="cdToggle()">▶ START</button>
+        <button class="btn btn-muted" onclick="cdReset()">■ RESET</button>
       </div>
-      <div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:2px">REMAINING</div>
-        <div style="font-family:var(--mono);font-size:28px;letter-spacing:3px;color:var(--accent2);text-shadow:0 0 14px rgba(255,64,129,.3)" id="work-remain-disp">--:--:--</div>
-      </div>
-    </div>
-    <!-- プログレスバー -->
-    <div style="height:3px;background:var(--border);border-radius:2px;margin:10px 0 14px;overflow:hidden">
-      <div id="work-progress" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent3),var(--accent));transition:width .8s linear;border-radius:2px"></div>
-    </div>
-
-    <!-- メインボタン -->
-    <div class="btn-row" style="margin-bottom:6px">
-      <button class="btn btn-green" id="work-start-btn" onclick="workTimerToggle()">▶ START</button>
-      <button class="btn btn-muted" onclick="workTimerReset()">■ RESET</button>
-      <button class="btn btn-cyan"  onclick="recordLap()">◎ LAP</button>
-    </div>
-
-    <!-- 巻き戻し / 早送り（一時停止中のみ有効） -->
-    <div class="seek-row">
-      <span class="seek-label">SEEK:</span>
-      <button class="btn-seek" id="seek-rw30" onclick="seekWork(-30)">«30s</button>
-      <button class="btn-seek" id="seek-rw10" onclick="seekWork(-10)">«10s</button>
-      <button class="btn-seek" id="seek-rw1"  onclick="seekWork(-1)">«1s</button>
-      <button class="btn-seek" id="seek-fw1"  onclick="seekWork(1)">1s»</button>
-      <button class="btn-seek" id="seek-fw10" onclick="seekWork(10)">10s»</button>
-      <button class="btn-seek" id="seek-fw30" onclick="seekWork(30)">30s»</button>
-    </div>
-
-    <!-- 作品の尺入力（STARTボタン下） -->
-    <div class="dur-row">
-      <span class="dur-label">DURATION:</span>
-      <div class="input-group">
-        <label>H</label>
-        <input type="number" id="work-dur-h" value="0" min="0" max="9" style="width:52px" oninput="updateWorkDuration()">
-      </div>
-      <div class="input-group">
-        <label>M</label>
-        <input type="number" id="work-dur-m" value="24" min="0" max="59" style="width:52px" oninput="updateWorkDuration()">
-      </div>
-      <div class="input-group">
-        <label>S</label>
-        <input type="number" id="work-dur-s" value="0" min="0" max="59" style="width:52px" oninput="updateWorkDuration()">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:14px">
+        ※ 0になると自動で作品タイマーをスタート
       </div>
     </div>
 
-    <!-- ラップ記録 -->
-    <div class="panel-label" style="margin-top:14px"><span></span>LAP LOG</div>
-    <div class="lap-list" id="lap-list"><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">— 記録なし —</div></div>
+    <!-- 作品タイマー表示エリア（カウントダウン終了後に表示） -->
+    <div id="work-area" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 32px;margin-bottom:14px;">
+        <!-- 左列：タイマー表示 -->
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:2px">経過時間</div>
+          <div class="timer-display" id="work-timer-disp" style="margin:0;font-size:48px">00:00:00</div>
+          <div style="font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:2px;margin:10px 0 2px">残り時間</div>
+          <div style="font-family:var(--mono);font-size:32px;letter-spacing:3px;color:var(--accent2);text-shadow:0 0 14px rgba(255,64,129,.3);margin-bottom:6px" id="work-remain-disp">--:--:--</div>
+          <div style="height:3px;background:var(--border);border-radius:2px;margin:6px 0 0;overflow:hidden">
+            <div id="work-progress" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent3),var(--accent));transition:width .8s linear;border-radius:2px"></div>
+          </div>
+        </div>
+        <!-- 右列：ラップ記録 -->
+        <div>
+          <div class="panel-label"><span></span>ラップ記録</div>
+          <div class="lap-list" id="lap-list"><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">— 記録なし —</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 作品タイマー操作（常時表示） -->
+    <div style="padding-top:12px;border-top:1px solid var(--border);">
+      <div class="btn-row" style="margin-bottom:6px">
+        <button class="btn btn-green" id="work-start-btn" onclick="workTimerToggle()">▶ START</button>
+        <button class="btn btn-muted" onclick="fullReset()">■ RESET</button>
+        <button class="btn btn-cyan"  onclick="recordLap()">◎ LAP</button>
+      </div>
+      <div class="seek-row">
+        <span class="seek-label">早戻し/送り:</span>
+        <button class="btn-seek" id="seek-rw30" onclick="seekWork(-30)">«30s</button>
+        <button class="btn-seek" id="seek-rw10" onclick="seekWork(-10)">«10s</button>
+        <button class="btn-seek" id="seek-rw1"  onclick="seekWork(-1)">«1s</button>
+        <button class="btn-seek" id="seek-fw1"  onclick="seekWork(1)">1s»</button>
+        <button class="btn-seek" id="seek-fw10" onclick="seekWork(10)">10s»</button>
+        <button class="btn-seek" id="seek-fw30" onclick="seekWork(30)">30s»</button>
+      </div>
+      <div class="dur-row">
+        <span class="dur-label">作品の尺:</span>
+        <div class="input-group">
+          <label>H</label>
+          <input type="number" id="work-dur-h" value="0" min="0" max="9" style="width:52px" oninput="updateWorkDuration()">
+        </div>
+        <div class="input-group">
+          <label>M</label>
+          <input type="number" id="work-dur-m" value="24" min="0" max="59" style="width:52px" oninput="updateWorkDuration()">
+        </div>
+        <div class="input-group">
+          <label>S</label>
+          <input type="number" id="work-dur-s" value="0" min="0" max="59" style="width:52px" oninput="updateWorkDuration()">
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ④ CM・休憩タイマー -->
   <div class="panel warn" id="panel-cm">
-    <div class="panel-label"><span></span>CM / BREAK TIMER</div>
+    <div class="panel-label"><span></span>CM / 休憩タイマー</div>
     <div class="timer-display warning" id="cm-disp" style="font-size:40px">00:00</div>
     <div class="cm-presets">
       <button class="btn-preset" onclick="setCmTime(90)">CM 90s</button>
@@ -602,7 +600,7 @@
 
   <!-- ⑤ 配信経過タイマー -->
   <div class="panel accent3" id="panel-stream">
-    <div class="panel-label"><span></span>STREAM ELAPSED — 配信経過時間</div>
+    <div class="panel-label"><span></span>配信経過時間</div>
     <div class="timer-small" id="stream-disp">00:00:00</div>
     <div class="elapsed-sub" id="stream-sub">配信開始前</div>
     <div class="btn-row" style="margin-top:10px;margin-bottom:8px">
@@ -801,6 +799,14 @@
     setSeekEnabled(false);
   };
 
+  // 作品タイマー＋カウントダウンを完全リセットしてcd-area表示に戻す
+  window.fullReset = function () {
+    window.workTimerReset();
+    window.cdReset();
+    document.getElementById('cd-area').style.display   = 'block';
+    document.getElementById('work-area').style.display = 'none';
+  };
+
   // seekボタンの有効/無効切り替え
   function setSeekEnabled(enabled) {
     document.querySelectorAll('.btn-seek').forEach(b => {
@@ -821,7 +827,7 @@
   setSeekEnabled(false); // 初期状態は無効
 
   // ===== パネル背景色 一括カスタマイズ =====
-  const ALL_PANEL_IDS = ['panel-work', 'panel-cd', 'panel-cm', 'panel-stream'];
+  const ALL_PANEL_IDS = ['panel-work', 'panel-cm', 'panel-stream'];
   const DEFAULT_COLOR = '#0f1218';
   const COLOR_STORAGE_KEY = 'vt_panel_color_global';
 
@@ -905,6 +911,9 @@
       cdBtn.textContent = '▶ START';
       cdDisp.textContent = '00:00';
       showAlarm('カウントダウン終了 — 再生スタート！');
+      // 表示を作品タイマーに切り替え
+      document.getElementById('cd-area').style.display  = 'none';
+      document.getElementById('work-area').style.display = 'block';
       // 作品タイマー自動スタート
       if (!workRunning) window.workTimerToggle();
       return;
@@ -925,7 +934,13 @@
         const m = parseInt(document.getElementById('cd-min').value) || 0;
         const s = parseInt(document.getElementById('cd-sec').value) || 0;
         cdRemain = m * 60 + s;
-        if (cdRemain <= 0) return;
+        if (cdRemain <= 0) {
+          // カウントダウンが0なら即作品タイマーへ切り替え
+          document.getElementById('cd-area').style.display  = 'none';
+          document.getElementById('work-area').style.display = 'block';
+          if (!workRunning) window.workTimerToggle();
+          return;
+        }
       }
       cdRunning = true;
       cdTimerId = setInterval(cdTick, 1000);
@@ -941,6 +956,11 @@
     cdDisp.textContent = '00:00';
     cdDisp.style.animation = '';
     cdBtn.textContent = '▶ START';
+    // カウントダウン表示に戻す
+    document.getElementById('cd-area').style.display  = 'block';
+    document.getElementById('work-area').style.display = 'none';
+    // 作品タイマーもリセット
+    window.workTimerReset();
   };
 
   // ===== CM・休憩タイマー =====
